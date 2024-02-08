@@ -15,14 +15,16 @@ return new class extends Migration
             $table->id();
             $table->string('nom');
             $table->string('nomfr')->nullable();
-            $table->string('tel1')->unique(); 
-            $table->string('tel2')->nullable(); 
+            $table->string('tel1')->unique();
+            $table->string('tel2')->nullable();
             $table->string('nni')->nullable()->unique(); // numero nationale
-            $table->longText('diplom')->nullable();   
+            $table->longText('diplom')->nullable();
             $table->string('se')->nullable();   // Autorisation d'enseignement 
             $table->string('ts')->nullable();  //type de salaire 
             $table->string('ms')->nullable();  // montant du salaire
             $table->string('image')->nullable();
+            $table->string('whcode')->default('222');
+            $table->string('password')->nullable();
             $table->boolean('list')->default(1);
             $table->timestamps();
             $table->softDeletes();

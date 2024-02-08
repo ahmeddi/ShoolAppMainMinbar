@@ -16,24 +16,24 @@ class ParentAdd extends Component
 
     public $visible = false;
 
-    #[Rule('required')] 
-    public $prname,$prnamefr;
+    #[Rule('required')]
+    public $prname, $prnamefr;
 
 
-    #[Rule('required', as:'')] 
+    #[Rule('required', as: '')]
     public $telephone;
 
-    public $whatsapp,$whcode = '222';
+    public $whatsapp, $whcode = '222';
 
-    #[Rule('required|not_in:0')] 
+    #[Rule('required|not_in:0')]
     public $psexe;
 
 
 
 
 
-    #[On('open')] 
-    public function open() 
+    #[On('open')]
+    public function open()
     {
         $this->resetErrorBag();
         $this->resetValidation();
@@ -43,26 +43,26 @@ class ParentAdd extends Component
 
 
     public function submit()
-    { 
+    {
 
         if ($this->telephone) {
             $this->telephone = Str::replace(' ', '', $this->telephone);
         }
-        if ( $this->whatsapp) {
+        if ($this->whatsapp) {
             $this->whatsapp = Str::replace(' ', '', $this->whatsapp);
         }
-       
+
         $this->resetErrorBag();
         $this->resetValidation();
 
         $this->validate();
 
 
-        $password = Str::random(8);
+        $password = rand(1000, 9999);
 
-        
 
-        
+
+
         $parent = Parentt::updateOrCreate(
             ['telephone' => $this->telephone],
             [
@@ -83,7 +83,7 @@ class ParentAdd extends Component
         if (!$user) {
             User::create([
                 'name'   => $parent->telephone,
-             //   'email'  => $parent->telephone,
+                //   'email'  => $parent->telephone,
                 'password'  => bcrypt($password),
                 'role' => 'parent',
                 'tel' => $parent->telephone,
@@ -91,27 +91,28 @@ class ParentAdd extends Component
                 'list' => 1,
                 'visible' => 0,
                 'parent_id' => $parent->id,
-              ]);
-        }
-        else{
+            ]);
+        } else {
             $user->update([
                 'name'   => $parent->telephone,
                 'parent_id' => $parent->id,
-              ]);
+            ]);
         }
 
         $create = new WhatsappApiService();
 
-        $create->parent($parent->nom,
-        $parent->nomfr,
-        $parent->sexe,
-        $parent->telephone,
-        $parent->whatsapp,
-        $parent->whcode,
-        $password);
-        
+        $create->parent(
+            $parent->nom,
+            $parent->nomfr,
+            $parent->sexe,
+            $parent->telephone,
+            $parent->whatsapp,
+            $parent->whcode,
+            $password
+        );
 
-      
+
+
         $this->dispatch('refresh');
 
         $this->reset();
@@ -121,12 +122,9 @@ class ParentAdd extends Component
         telephone = '';
 
     JS;
-
-
-
     }
 
-    
+
     #[Js]
     public function close()
     {
@@ -138,11 +136,10 @@ class ParentAdd extends Component
         JS;
 
         $this->reset();
-
     }
 
 
-    
+
     public function render()
     {
         return view('livewire.parent-add');

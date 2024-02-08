@@ -32,25 +32,25 @@ class EtudiantAdd extends Component
 
     public $visible = false;
 
-    #[Rule('required')] 
+    #[Rule('required')]
     public $prname,  $prnamefr;
 
-    #[Rule('numeric', as:' ')] 
+    #[Rule('numeric', as: ' ')]
     public $montant = 0;
 
 
-    #[Rule('required', as:' ')] 
+    #[Rule('required', as: ' ')]
     public $telephone;
 
     public $whatsapp;
 
-    #[Rule('required_if:whatsapp,!=,null', as:' ')] 
+    #[Rule('required_if:whatsapp,!=,null', as: ' ')]
     public $whcode = '222';
 
-    #[Rule('required|not_in:0', as:' ')] 
+    #[Rule('required|not_in:0', as: ' ')]
     public $psexe;
 
-    #[Rule('required')] 
+    #[Rule('required')]
     public $nom,  $nomfr;
 
     public $soir;
@@ -59,26 +59,26 @@ class EtudiantAdd extends Component
 
     public $nc;
 
-    #[Rule('required|not_in:0')] 
+    #[Rule('required|not_in:0')]
     public $sexe;
 
     public $nni;
 
 
-    #[Rule('required')] 
+    #[Rule('required')]
     public $nb;
 
     public $nbs;
 
-    #[Rule('required|not_in:0')] 
+    #[Rule('required|not_in:0')]
     public $cls;
 
     public $etudiant;
 
 
 
-    #[On('open')] 
-    public function open() 
+    #[On('open')]
+    public function open()
     {
         $this->resetErrorBag();
         $this->resetValidation();
@@ -86,11 +86,11 @@ class EtudiantAdd extends Component
         $this->visible = true;
     }
 
-    
+
     public function num()
     {
         $class = Classe::find($this->cls);
-    
+
         if (!$class) {
             $this->nbs = '';
         } elseif ($class->etuds->count()) {
@@ -103,22 +103,21 @@ class EtudiantAdd extends Component
 
 
     public function submit()
-    { 
-
-
-       
-    if ($this->telephone) {
-        $this->telephone = Str::replace(' ', '', $this->telephone);
-    }
-    if ( $this->whatsapp) {
-        $this->whatsapp = Str::replace(' ', '', $this->whatsapp);
-    }
-
-    if ($this->montant)
     {
-        $this->montant = Str::replace(' ', '', $this->montant);
-    }
-    
+
+
+
+        if ($this->telephone) {
+            $this->telephone = Str::replace(' ', '', $this->telephone);
+        }
+        if ($this->whatsapp) {
+            $this->whatsapp = Str::replace(' ', '', $this->whatsapp);
+        }
+
+        if ($this->montant) {
+            $this->montant = Str::replace(' ', '', $this->montant);
+        }
+
 
 
         $this->resetErrorBag();
@@ -126,9 +125,11 @@ class EtudiantAdd extends Component
 
         $this->validate();
 
-        $password = Str::random(8);
+        $password = rand(1000, 9999);;
 
-        
+
+
+
         $parent = Parentt::updateOrCreate(
             ['telephone' => $this->telephone],
             [
@@ -148,7 +149,7 @@ class EtudiantAdd extends Component
         if (!$user) {
             User::create([
                 'name'   => $parent->telephone,
-               // 'email'  => $parent->telephone,
+                // 'email'  => $parent->telephone,
                 'password'  => bcrypt($password),
                 'role' => 'parent',
                 'tel' => $parent->telephone,
@@ -156,11 +157,11 @@ class EtudiantAdd extends Component
                 'list' => 1,
                 'visible' => 0,
                 'parent_id' => $parent->id,
-              ]);
+            ]);
         }
 
 
-        
+
 
         $etudiant =   Etudiant::create([
             'nom'   => $this->nom,
@@ -173,17 +174,17 @@ class EtudiantAdd extends Component
             'classe_id' => $this->cls,
             'parent_id' => $parent->id,
             'list' => $this->list,
-          //  'soir' => $this->soir,
-          ]); 
+            //  'soir' => $this->soir,
+        ]);
 
-         $profil =  Profil::find(1);
+        $profil =  Profil::find(1);
 
-         $recet = $profil->recet;
-         $mois = $profil->mois;
+        $recet = $profil->recet;
+        $mois = $profil->mois;
 
-         $classMont = $etudiant->classe->prix;
+        $classMont = $etudiant->classe->prix;
 
-         $frais = (intval($mois) * intval($classMont)) + intval($recet);
+        $frais = (intval($mois) * intval($classMont)) + intval($recet);
 
 
         Fraisetud::create([
@@ -191,28 +192,27 @@ class EtudiantAdd extends Component
             'parent_id' => $parent->id,
             'montant' =>  $frais,
             'motif' => 1,
-            'mois'=> Carbon::now()->month,
-            'annee'=> Carbon::now()->year,
+            'mois' => Carbon::now()->month,
+            'annee' => Carbon::now()->year,
             'date' => now()->format('Y-m-d'),
-          ]);
+        ]);
 
-          if ($this->montant) {
+        if ($this->montant) {
             PaiementParent::create([
                 'parent_id' => $parent->id,
                 'montant' => $this->montant,
                 'date' => now()->format('Y-m-d'),
-              ]);
-          }
-       
+            ]);
+        }
+
 
         $this->visible = false;
 
 
 
-        
-        if ($this->whatsapp) 
-        {
-            
+
+        if ($this->whatsapp) {
+
             $whatsapp_msg = new WhatsappApiService();
 
             $whatsapp_msg->creates(
@@ -226,11 +226,10 @@ class EtudiantAdd extends Component
                 $this->whcode,
                 $password,
             );
+        }
 
-        } 
-        
 
-      
+
         $this->dispatch('refresh');
 
         $this->reset();
@@ -242,12 +241,9 @@ class EtudiantAdd extends Component
 
 
     JS;
-
-
-
     }
 
-    
+
     #[Js]
     public function close()
     {
@@ -259,7 +255,6 @@ class EtudiantAdd extends Component
         JS;
 
         $this->reset();
-
     }
 
 
